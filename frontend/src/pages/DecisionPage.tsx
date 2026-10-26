@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { api, useAsync } from '../api'
 import { ErrorByPeriod, ForecastVsActual, C } from '../components/charts'
 import { ErrorState, Kpi, Loading, Panel } from '../components/Panel'
-import { clock, dayShort, fullDay, gwh, mw, pct, signedMw } from '../format'
+import { clock, dayShort, fullDay, gwh, mw, pct, signedGwh, signedMw } from '../format'
 import type { Meta } from '../types'
 
 export function DecisionPage({
@@ -41,9 +41,6 @@ export function DecisionPage({
   if (!data) return null
 
   const { summary, energy, buffer } = data
-  const horizonHours = 24
-  const biasGwh = ((buffer.bias_mw ?? 0) * horizonHours) / 1000
-  const headroomGwh = ((buffer.headroom_p90_mw ?? 0) * horizonHours) / 1000
   const vsForecastPct =
     energy.forecast_gwh > 0 ? ((energy.recommended_gwh_p90 - energy.forecast_gwh) / energy.forecast_gwh) * 100 : 0
 
@@ -121,23 +118,14 @@ export function DecisionPage({
           value={gwh(energy.actual_gwh)}
           unit="GWh"
           accent={C.actual}
-          sub={`Mean ${mw(summary.mean_actual_mw)} MW · ${data.status === 'published' ? 'settled' : 'pending'}`}
+          sub={`Mean ${mw(summary.mean_actual_mw)} MW`}
         />
         <Kpi
-          label="Mean absolute error"
+          label="Forecast error"
           value={mw(summary.mae_mw)}
           unit="MW"
-          accent={C.over}
-          sub={`90th percentile miss ${mw(summary.p90_abs_error_mw)} MW`}
-        />
-        <Kpi
-          label="Bias"
-          value={signedMw(summary.bias_mw)}
-          unit="MW"
           accent={C.under}
-          sub={`Forecast ran ${pct(summary.bias_ratio ? Math.abs(summary.bias_ratio - 1) * 100 : null)} ${
-            (summary.bias_ratio ?? 1) >= 1 ? 'above' : 'below'
-          } outturn`}
+          sub={`${pct(summary.nmae_pct)} of average output`}
         />
       </div>
 
@@ -163,50 +151,34 @@ export function DecisionPage({
           </div>
         </Panel>
 
-        <Panel title="Procurement recommendation" bodyClass="rec-body" note="Adjustment to apply to the raw wind forecast before bidding.">
+        <Panel
+          title="Procurement recommendation"
+          bodyClass="rec-body"
+          note="What to bid, after correcting for measured error."
+        >
           <div className="rec">
-            <div className="kpi-label">Recommended wind volume</div>
+            <div className="kpi-label">Recommended bid</div>
             <div className="rec-big">
               <span className="v">{gwh(energy.recommended_gwh_p90)}</span>
               <span className="u">GWh</span>
-            </div>
-            <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
-              {vsForecastPct >= 0 ? 'Above' : 'Below'} the raw forecast by {pct(Math.abs(vsForecastPct))}
+              <span className="rec-delta">{signedGwh(vsForecastPct)}%</span>
             </div>
 
             <div className="rec-line">
-              <span className="k">Forecast energy</span>
+              <span className="k">Raw forecast</span>
               <span className="v">{gwh(energy.forecast_gwh)} GWh</span>
             </div>
-            <div className="rec-line">
-              <span className="k">
-                De-bias
-                <small>{mw(buffer.bias_mw)} MW over-stated, averaged over 24h</small>
-              </span>
-              <span className="v neg">−{gwh(Math.abs(biasGwh))} GWh</span>
-            </div>
-            <div className="rec-line">
-              <span className="k">
-                Headroom (p90)
-                <small>{mw(buffer.headroom_p90_mw)} MW to cover 9 half-hours in 10</small>
-              </span>
+            <div className="rec-line" style={{ borderBottom: 0 }}>
+              <span className="k">Adjustment</span>
               <span className="v" style={{ color: C.green }}>
-                +{gwh(Math.abs(headroomGwh))} GWh
-              </span>
-            </div>
-            <div className="rec-line" style={{ borderBottom: 0, paddingBottom: 0 }}>
-              <span className="k" style={{ color: 'var(--text)', fontWeight: 600 }}>
-                Net adjustment
-              </span>
-              <span className="v" style={{ color: C.green }}>
-                {signedMw(buffer.net_adjustment_mw)} MW
+                {signedGwh(energy.recommended_gwh_p90 - energy.forecast_gwh)} GWh
               </span>
             </div>
 
             <p className="rec-foot">
-              Headroom and bias calibrated on {buffer.n.toLocaleString('en-GB')} settlement periods of realised
-              January 2026 error at {buffer.lead_window} lead. Ex-post calibration: a production build would use a
-              rolling walk-forward window so no future information leaks into a past decision.
+              The forecast ran {mw(buffer.bias_mw)} MW high on average, so buy less — but hold {mw(buffer.headroom_p90_mw)} MW
+              back for the days it runs low. Net {signedMw(buffer.net_adjustment_mw)} MW, calibrated on{' '}
+              {buffer.n.toLocaleString('en-GB')} half-hours at {buffer.lead_window} lead (ex-post).
             </p>
           </div>
         </Panel>

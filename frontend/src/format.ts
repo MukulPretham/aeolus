@@ -17,6 +17,10 @@ export function gwh(value: number | null | undefined): string {
   return value === null || value === undefined ? '—' : oneDp.format(value)
 }
 
+export function signedGwh(value: number): string {
+  return `${value > 0 ? '+' : value < 0 ? '−' : ''}${oneDp.format(Math.abs(value))}`
+}
+
 export function pct(value: Metric | undefined): string {
   return value === null || value === undefined ? '—' : `${oneDp.format(value)}%`
 }

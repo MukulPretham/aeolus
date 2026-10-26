@@ -205,8 +205,7 @@ export function LeadBuckets({ buckets }: { buckets: Bucket[] }) {
       const span = bucket.lead_to_h >= 96 ? `${bucket.lead_from_h}h+` : `${bucket.lead_from_h}-${bucket.lead_to_h}h`
       return {
         bucket: `${span} · n=${bucket.n.toLocaleString('en-GB')}`,
-        raw: bucket.mae_mw,
-        debiased: bucket.mae_debiased_mw,
+        mae: bucket.mae_mw,
         n: bucket.n,
       }
     })
@@ -214,12 +213,7 @@ export function LeadBuckets({ buckets }: { buckets: Bucket[] }) {
   return (
     <div className="chart short">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          layout="vertical"
-          margin={{ top: 8, right: 24, bottom: 4, left: 8 }}
-          barGap={1}
-        >
+        <BarChart data={data} layout="vertical" margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
           <CartesianGrid stroke={C.grid} horizontal={false} />
           <XAxis type="number" tickFormatter={mwTick} {...axisProps} axisLine={false} />
           <YAxis
@@ -231,14 +225,7 @@ export function LeadBuckets({ buckets }: { buckets: Bucket[] }) {
             tick={{ fill: C.axis, fontSize: 11 }}
           />
           <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-          <Bar dataKey="raw" name="MAE" fill={C.forecast} radius={[0, 3, 3, 0]} isAnimationActive={false} />
-          <Bar
-            dataKey="debiased"
-            name="MAE, de-biased"
-            fill={C.green}
-            radius={[0, 3, 3, 0]}
-            isAnimationActive={false}
-          />
+          <Bar dataKey="mae" name="MAE" fill={C.forecast} radius={[0, 3, 3, 0]} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
     </div>

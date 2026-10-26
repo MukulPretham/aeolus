@@ -181,6 +181,11 @@ conclusion; it is documented here so a reviewer can see it was considered rather
 | De-biased MAE | MAE of the centred error | separates systematic from random error |
 | Headroom (p90) | 90th percentile of the centred shortfall | the number of MW to hold for 9-in-10 coverage |
 
+The API computes more than the interface shows — RMSE, nMAE, p90/max absolute error and shortfall
+quantiles are all returned, because they are cheap and a reviewer may want them. The UI deliberately
+surfaces only the numbers that answer a distinct question (how big, which way, what to bid), so no figure
+is shown twice and nobody has to do arithmetic on screen.
+
 ### 3. From error to a bid
 
 The recommendation on the trading desk view is two corrections composed:

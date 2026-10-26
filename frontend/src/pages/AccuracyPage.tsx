@@ -79,36 +79,22 @@ export function AccuracyPage({
               value={mw(data.overall.mae_mw)}
               unit="MW"
               accent={C.forecast}
-              sub={`${pct(data.overall.nmae_pct)} of mean outturn`}
+              sub={`${pct(data.overall.nmae_pct)} of average output`}
             />
             <Kpi
-              label="Root mean squared error"
-              value={mw(data.overall.rmse_mw)}
-              unit="MW"
-              accent={C.actual}
-              sub={`Punishes the big misses · p90 abs ${mw(data.overall.p90_abs_error_mw)} MW`}
-            />
-            <Kpi
-              label="Systematic bias"
+              label="Bias"
               value={signedMw(data.overall.bias_mw)}
               unit="MW"
               accent={C.under}
-              sub={`Forecast is ${pct(
+              sub={`Forecast runs ${pct(
                 data.overall.bias_ratio ? Math.abs(data.overall.bias_ratio - 1) * 100 : null,
-              )} ${(data.overall.bias_ratio ?? 1) >= 1 ? 'above' : 'below'} outturn`}
-            />
-            <Kpi
-              label="MAE after de-biasing"
-              value={mw(data.overall.mae_debiased_mw)}
-              unit="MW"
-              accent={C.green}
-              sub={`${pct(data.overall.mae_improvement_pct)} of the error is systematic`}
+              )} ${(data.overall.bias_ratio ?? 1) >= 1 ? 'high' : 'low'}`}
             />
           </div>
 
           <Panel
             title="Daily mean absolute error"
-            note="Raw error against the same error with the average miss removed. Days where the two bars sit far apart are days the bias, not the weather, drove the outcome."
+            note={`Raw error, and the same error with the average miss removed — ${pct(data.overall.mae_improvement_pct)} of the error is a constant offset rather than weather.`}
           >
             <DailyMae days={data.by_day} />
             <div className="legend">
@@ -151,7 +137,6 @@ export function AccuracyPage({
                     <th>Date</th>
                     <th>Weekday</th>
                     <th>MAE MW</th>
-                    <th>Bias MW</th>
                     <th>Forecast GWh</th>
                     <th>Actual GWh</th>
                     <th>Opening</th>
@@ -165,7 +150,6 @@ export function AccuracyPage({
                       <td className={day.mae_mw && day.mae_mw > (data.overall.mae_mw ?? 0) ? 'neg' : ''}>
                         {mw(day.mae_mw)}
                       </td>
-                      <td>{signedMw(day.bias_mw)}</td>
                       <td>{gwh(day.forecast_gwh)}</td>
                       <td>{gwh(day.actual_gwh)}</td>
                       <td className="muted">View →</td>
@@ -176,19 +160,6 @@ export function AccuracyPage({
             </div>
           </Panel>
 
-          <div className="banner">
-            <div className="banner-main">
-              <span className="banner-title">What this means for the bid</span>
-              <span className="banner-text">
-                Buy the forecast adjusted by {signedMw(data.buffer.net_adjustment_mw)} MW ({pct(data.buffer.net_adjustment_pct)})
-                to cover 90% of historical shortfalls at day-ahead lead. Full derivation on the trading desk view.
-              </span>
-            </div>
-            <div className="banner-metric">
-              <div className="v">{signedMw(data.buffer.net_adjustment_mw)} MW</div>
-              <div className="l">Net adjustment</div>
-            </div>
-          </div>
         </>
       )}
     </div>

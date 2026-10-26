@@ -171,20 +171,13 @@ export function MethodPage({
         <Panel title="Metric definitions" bodyClass="">
           <div className="kv">
             <div>MAE</div>
-            <div>Mean of |forecast − actual|. The headline miss in MW.</div>
-            <div>RMSE</div>
-            <div>Square-rooted mean squared error. Weights large misses more heavily.</div>
+            <div>Mean miss in MW, ignoring direction. Also shown as a share of average output.</div>
             <div>Bias</div>
-            <div>Mean of (forecast − actual). Positive means a standing over-forecast.</div>
-            <div>nMAE</div>
-            <div>MAE as a share of mean outturn. Used instead of MAPE, which explodes when wind is near zero.</div>
+            <div>Average miss <em>with</em> direction. Positive means the forecast runs high.</div>
             <div>De-biased MAE</div>
-            <div>MAE after subtracting the mean error — the random component left over.</div>
-            <div>Headroom (p90)</div>
-            <div>
-              90th percentile of the centred shortfall. Hold this much above a de-biased forecast to cover nine
-              half-hours in ten.
-            </div>
+            <div>What is left after removing the average miss — the unpredictable part.</div>
+            <div>Headroom</div>
+            <div>The margin to hold so nine half-hours in ten are covered, from the measured shortfall.</div>
           </div>
         </Panel>
       </div>

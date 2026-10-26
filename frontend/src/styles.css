@@ -271,7 +271,9 @@ button:focus-visible {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* One number per question: the grid takes however many cards a page needs
+     and spreads them across the full width. */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
 }
 
@@ -568,6 +570,19 @@ button:focus-visible {
   color: var(--green);
 }
 
+.rec-delta {
+  margin-left: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--green);
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 999px;
+  padding: 2px 9px;
+  align-self: center;
+}
+
 .rec-big .u {
   font-size: 14px;
   color: var(--muted);
@@ -860,9 +875,6 @@ table.data {
 @media (max-width: 1180px) {
   .split {
     grid-template-columns: 1fr;
-  }
-  .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .flow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
