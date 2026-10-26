@@ -91,14 +91,16 @@ export function MethodPage({
               exists in the data, and ignoring it is the whole point.
             </p>
             <p>
-              <code>WINDFOR</code> is hourly and <code>FUELHH</code> is half-hourly. Each forecast hour is compared
-              with the mean of the two settlement periods it spans, which keeps the comparison energy-consistent
-              rather than crediting a run for one lucky half-hour.
+              <code>WINDFOR</code> is hourly and <code>FUELHH</code> is half-hourly: 24 values a day against 48.
+              Bids settle per half-hour, so the delivery grid is the settlement period and the hourly value is
+              held flat across the two it covers — nothing is interpolated, because that would claim precision
+              the forecast does not have. Each half-hour is scored against its own outturn. Collapsing outturn to
+              the hourly grid instead moves MAE by 0.13%.
             </p>
           </div>
         </Panel>
 
-        <Panel title="Forecast vintages around this delivery day" note={`Every run that covered ${dayLabel(date)}. Runs after ${clock(vintages?.cutoff)} UTC on the previous day could not have informed the bid.`}>
+        <Panel title="Forecast vintages around this delivery day" note={`Every run that covered ${dayLabel(date)}. Runs after ${clock(vintages?.cutoff)} UTC on the previous day could not have informed the bid. Hours = hourly points inside this delivery day; each run carries 73 points over a fixed 72h window.`}>
           {vintages ? (
             <div className="scroll" style={{ maxHeight: 360 }}>
               <table className="data">

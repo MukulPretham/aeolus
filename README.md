@@ -130,8 +130,12 @@ origin; the frontend falls back to same-origin `/api` paths when it is unset.
 
 ### 1. Reconstructing what the desk knew
 
-`WINDFOR` is a *vintaged* dataset: the same delivery hour appears once per forecast run (8 runs/day,
-published at 02:30, 04:30, 07:30, 09:30, 11:30, 15:30, 18:30, 22:30 UTC, each covering ~3 days ahead).
+`WINDFOR` is a *vintaged* dataset: the same delivery hour appears once per forecast run — 8 runs a day,
+at 02:30, 04:30, 07:30, 09:30, 11:30, 15:30, 18:30 and 22:30 UTC. Every run carries exactly **73 hourly
+points over a fixed 72-hour delivery window**, from 21:00 the day before the run to 21:00 two days after
+it (verified across all 296 vintage runs). The split between past and future therefore shifts with
+publication time: the 02:30 run reaches 66.5h ahead, the 22:30 run only 46.5h. A later run is *fresher*,
+not longer.
 
 For delivery half-hour `t` on day `D` with gate closure `c = D−1 12:00Z`:
 
@@ -145,8 +149,26 @@ O(log n) and — more importantly — **provably free of look-ahead**. A run pub
 delivery day exists in the data and is never used for a 12:00 cutoff. Changing the cutoff in the UI
 changes which vintages qualify, and the metrics move accordingly.
 
-`WINDFOR` is hourly and `FUELHH` is half-hourly, so each forecast hour is compared with the **mean of
-the two settlement periods** it spans.
+### 2. Bridging the two resolutions
+
+The streams do not share a clock. `FUELHH` returns **48 half-hourly** values per day; `WINDFOR` returns
+**24 hourly** values per delivery day. That fixed 72-hour window is also why a 12:00 cutoff on D−1 — the
+11:30 run — always covers all 48 periods of D: its window is (D−2) 21:00 → (D+1) 21:00. Full coverage is
+structural, not luck.
+
+The delivery grid is the settlement period, because that is the unit the desk bids and settles. So:
+
+- Each half-hour resolves to the forecast for the hour containing it — `floor_to_hour(t)` — and that
+  hourly value is **held flat across the two periods it covers**. Nothing is interpolated: inventing
+  intra-hour shape would claim precision the forecast does not have.
+- Each settlement period is then scored against **its own** outturn, so the metric measures the imbalance
+  the desk actually carries in each period rather than an hour-averaged abstraction.
+- Energy aggregation stays consistent: `MW × 0.5 h` per period, so a day of flat pairs sums to the same
+  MWh as summing the hourly values. Sample sizes are counted in periods (1,488), not hours (744).
+
+The alternative convention — collapsing outturn to the hourly grid by averaging each pair — gives
+**MAE 2,018 MW vs 2,021 MW (+0.13%)**, RMSE 2,477 vs 2,481, identical bias. The choice changes no
+conclusion; it is documented here so a reviewer can see it was considered rather than stumbled into.
 
 ### 2. Metrics
 

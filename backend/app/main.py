@@ -202,7 +202,7 @@ def meta() -> dict:
         },
         "assumptions": [
             "WINDFOR values are treated as MW; upstream documentation does not state units.",
-            "Hourly WINDFOR values are compared with the mean of the two half-hours they span.",
+            "Hourly WINDFOR values are held flat across the two half-hours they cover; each half-hour is scored against its own outturn.",
             "Delivery times are UTC; January is GMT so no clock change applies.",
         ],
     }
