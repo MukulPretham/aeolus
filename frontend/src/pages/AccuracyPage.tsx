@@ -1,7 +1,7 @@
 import { api, useAsync } from '../api'
 import { C, DailyMae } from '../components/charts'
 import { ErrorState, Kpi, Loading, Panel } from '../components/Panel'
-import { dayLabel, mw, pct, signedMw } from '../format'
+import { dayLabel, mw, pct, signedPct } from '../format'
 import type { Meta } from '../types'
 
 export function AccuracyPage({
@@ -76,26 +76,31 @@ export function AccuracyPage({
           <div className="kpi-grid">
             <Kpi
               label="Average error"
-              value={mw(data.overall.mae_mw)}
-              unit="MW"
+              value={pct(data.overall.nmae_pct)}
               accent={C.forecast}
-              sub={`${pct(data.overall.nmae_pct)} of average output`}
+              sub={`${mw(data.overall.mae_mw)} MW average miss`}
             />
             <Kpi
               label="Bias"
-              value={signedMw(data.overall.bias_mw)}
-              unit="MW"
+              value={signedPct(
+                data.overall.bias_ratio ? (data.overall.bias_ratio - 1) * 100 : null,
+              )}
               accent={C.under}
-              sub={`Forecast runs ${pct(
-                data.overall.bias_ratio ? Math.abs(data.overall.bias_ratio - 1) * 100 : null,
-              )} ${(data.overall.bias_ratio ?? 1) >= 1 ? 'high' : 'low'}`}
+              sub={`Forecast runs ${(data.overall.bias_ratio ?? 1) >= 1 ? 'high' : 'low'} by ${mw(
+                data.overall.bias_mw === null ? null : Math.abs(data.overall.bias_mw),
+              )} MW`}
             />
             <Kpi
               label="After removing bias"
-              value={mw(data.overall.mae_debiased_mw)}
-              unit="MW"
+              value={pct(
+                data.overall.mae_debiased_mw !== null && data.overall.mean_actual_mw
+                  ? (data.overall.mae_debiased_mw / data.overall.mean_actual_mw) * 100
+                  : null,
+              )}
               accent={C.green}
-              sub={`${pct(data.overall.mae_improvement_pct)} of the error is a constant offset`}
+              sub={`${mw(data.overall.mae_debiased_mw)} MW · ${pct(
+                data.overall.mae_improvement_pct,
+              )} of the error is a constant offset`}
             />
           </div>
 

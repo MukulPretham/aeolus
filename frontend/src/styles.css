@@ -261,6 +261,26 @@ button:focus-visible {
   letter-spacing: -0.02em;
 }
 
+.err-line {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+  flex-wrap: wrap;
+}
+
+.err-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+  background: rgba(245, 166, 35, 0.12);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+}
+
 .page-sub {
   color: var(--muted);
   font-size: 13px;
@@ -695,11 +715,15 @@ table.data {
   font-size: 12px;
 }
 
-.pos {
+/* Scoped to the table cell: `.data tbody td` is more specific than a bare
+   class, so a plain `.pos` rule never applied and the colours stayed grey. */
+.pos,
+.data tbody td.pos {
   color: var(--indigo);
 }
 
-.neg {
+.neg,
+.data tbody td.neg {
   color: var(--red);
 }
 

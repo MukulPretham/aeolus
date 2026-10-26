@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { api, useAsync } from '../api'
 import { C, ForecastVsActual } from '../components/charts'
 import { ErrorState, Loading, Panel } from '../components/Panel'
-import { clock, dayShort, fullDay, mw, signedMw } from '../format'
+import { clock, dayShort, fullDay, mw, pct, signedPct } from '../format'
 import type { Meta } from '../types'
 
 /** Compress missing settlement periods into a readable range: [45,46,47] -> "45-47". */
@@ -82,6 +82,9 @@ export function DecisionPage({
               </span>
             )}
           </p>
+          <div className="err-line">
+            <span className="err-chip">Average error {pct(data.summary.nmae_pct)} of output</span>
+          </div>
         </div>
         <div className="date-nav">
           <button
@@ -135,7 +138,7 @@ export function DecisionPage({
                 <th>Time (UTC)</th>
                 <th>Forecast MW</th>
                 <th>Actual MW</th>
-                <th>Error MW</th>
+                <th>Error %</th>
               </tr>
             </thead>
             <tbody>
@@ -146,7 +149,9 @@ export function DecisionPage({
                   <td>{mw(row.forecast_mw)}</td>
                   <td>{mw(row.actual_mw)}</td>
                   <td className={row.error_mw === null ? '' : row.error_mw >= 0 ? 'pos' : 'neg'}>
-                    {signedMw(row.error_mw)}
+                    {row.error_mw === null || row.actual_mw === null || row.actual_mw < 1
+                      ? '—'
+                      : signedPct((row.error_mw / row.actual_mw) * 100)}
                   </td>
                 </tr>
               ))}

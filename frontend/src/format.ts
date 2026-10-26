@@ -21,6 +21,11 @@ export function signedGwh(value: number): string {
   return `${value > 0 ? '+' : value < 0 ? '−' : ''}${oneDp.format(Math.abs(value))}`
 }
 
+export function signedPct(value: Metric | undefined): string {
+  if (value === null || value === undefined) return '—'
+  return `${value > 0 ? '+' : value < 0 ? '−' : ''}${oneDp.format(Math.abs(value))}%`
+}
+
 export function pct(value: Metric | undefined): string {
   return value === null || value === undefined ? '—' : `${oneDp.format(value)}%`
 }
