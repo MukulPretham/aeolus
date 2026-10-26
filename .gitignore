@@ -1,0 +1,31 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# SQLite sidecar files (the warehouse itself IS committed — it is the demo data)
+backend/data/*.db-wal
+backend/data/*.db-shm
+backend/data/*.db-journal
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+
+# Docker build scratch (local sandbox only)
+.docker-tmp/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Secrets
+.env
+.env.*
+!.env.example

@@ -1,0 +1,9 @@
+# Heroku container-stack manifest.
+#   heroku create <name>
+#   heroku stack:set container
+#   git push heroku main
+build:
+  docker:
+    web: Dockerfile
+run:
+  web: uvicorn app.main:app --host 0.0.0.0 --port $PORT
