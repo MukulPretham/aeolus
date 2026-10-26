@@ -27,7 +27,7 @@ function readTab(): Tab {
 const params = new URLSearchParams(window.location.search)
 const linkedDate = params.get('date')
 const linkedCutoff = Number(params.get('cutoff'))
-const initialCutoff = Number.isInteger(linkedCutoff) && linkedCutoff >= 0 && linkedCutoff <= 23 ? linkedCutoff : 12
+const initialCutoff = CUTOFF_OPTIONS.includes(linkedCutoff) ? linkedCutoff : 12
 
 export default function App() {
   const [tab, setTab] = useState<Tab>(readTab)
@@ -37,10 +37,12 @@ export default function App() {
 
   const { data: meta, loading, error } = useAsync((signal) => api.meta(signal), [])
 
-  // Seed the date defaults from the available data as soon as metadata lands.
+  // Seed defaults from the data as soon as metadata lands, and repair a deep
+  // link that names a day we do not hold rather than showing a 404 panel.
   useEffect(() => {
     if (!meta) return
-    if (!date) setDate(meta.delivery_dates[meta.delivery_dates.length - 1] ?? meta.period.start)
+    const fallback = meta.delivery_dates[meta.delivery_dates.length - 1] ?? meta.period.start
+    if (!date || !meta.delivery_dates.includes(date)) setDate(fallback)
     if (!range) setRange({ start: meta.period.start, end: meta.period.end })
   }, [meta, date, range])
 
