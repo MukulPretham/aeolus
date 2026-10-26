@@ -32,8 +32,8 @@ component of the error.
 
 Best day: 19 Jan (552 MW MAE). Worst: 11 Jan (4,945 MW MAE).
 
-The app shows both the raw and the de-biased series, because "your forecast is wrong" is not actionable
-but "your forecast is wrong in a predictable direction by a measurable amount" is.
+The app shows the error, the bias, and what is left after removing it, because "your forecast is wrong"
+is not actionable but "your forecast is wrong in a predictable direction by a measurable amount" is.
 
 ---
 
@@ -192,7 +192,9 @@ is shown twice and nobody has to do arithmetic on screen.
 
 ### 3. From error to a bid
 
-The recommendation on the trading desk view is two corrections composed:
+The API composes two corrections into a bid (the interface deliberately stops at the error and bias —
+the numbers below are returned by `/api/decision` and covered by tests, not rendered as a second
+dashboard):
 
 ```
 bid = forecast − bias + headroom(p90)
@@ -211,7 +213,7 @@ never informed by a future outcome.
 
 | Route | Purpose |
 | --- | --- |
-| `GET /api/decision?delivery_date=&cutoff_hour=` | vintage-aware reconstruction for one day + procurement adjustment |
+| `GET /api/decision?delivery_date=&cutoff_hour=` | vintage-aware reconstruction for one day, coverage, lead range and the calibrated bid |
 | `GET /api/accuracy?start=&end=&cutoff_hour=` | metrics, lead-time curve, histogram, daily ranking |
 | `GET /api/vintages?delivery_date=&cutoff_hour=` | every run covering a day, flagged usable / not |
 | `GET /api/meta` | coverage, provenance, assumptions; drives the date pickers |

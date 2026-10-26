@@ -51,12 +51,6 @@ export default function App() {
     window.history.replaceState(null, '', `${query}#${tab}`)
   }, [tab, date, cutoffHour])
 
-  const openDay = (day: string) => {
-    setDate(day)
-    setTab('decision')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -118,7 +112,6 @@ export default function App() {
             date={date}
             cutoffHour={cutoffHour}
             onDateChange={setDate}
-            onOpenAccuracy={() => setTab('accuracy')}
           />
         )}
 
@@ -129,7 +122,6 @@ export default function App() {
             end={range.end}
             cutoffHour={cutoffHour}
             onRangeChange={(start, end) => setRange({ start, end })}
-            onOpenDay={openDay}
           />
         )}
 

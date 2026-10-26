@@ -29,29 +29,30 @@ Before recording:
 > question is not 'what is the forecast', it's 'which forecast'. The second is: what does its error cost
 > me, in megawatts I can put in a bid?"
 
-### 1:15–2:15 — Trading desk view (the money screen)
-- Point at the banner: **"Latest forecast available: 11:30 UTC, 48 of 48 periods covered."**
-  > "This is the run your desk would have had on the screen — not a perfect hindsight forecast."
+### 1:15–2:15 — Trading desk view
+- Point at the header line: **"Forecast run 11:30 UTC, Tue 20 Jan · 13–36h old at delivery."**
+  > "This is the run your desk would have had on the screen — not a perfect hindsight forecast. The
+  > header tells you which run it was and how old it was when you had to bid."
 - Point at the two lines.
-  > "Amber is what you were told. Cyan is what happened. Everything below is calculated from that gap."
-- Point at the four KPIs, then the error chart.
-  > "Every bar is a half-hour you paid for capacity you didn't use. On the 21st, 3.9 GW average."
+  > "Amber is what you were told. Cyan is what happened. Every half-hour below is that gap, in the form
+  > you book it."
+- Scroll the settlement-period table.
+  > "Forty-eight rows — settlement period, forecast, actual, error. The three biggest misses are
+  > highlighted. On the 21st every single one is positive, which is the story."
 
-### 2:15–3:15 — The recommendation (the differentiator)
-- Zoom on the right-hand card.
-  > "We don't just report error, we price it. Your forecast over-states by 1.8 GW on average. If you
-  > de-bias that and then hold the 90th percentile of what's left, your net adjustment is plus 349 MW
-  > — 2.6%. Small, but it is knowable in advance and it is repeatable across the month."
-  >
-  > "Across January that bias was 1,344 gigawatt-hours of capacity you committed to and never used."
+### 2:15–3:15 — What the gap costs (no screen, just the point)
+> "Across January that gap was one and a third terawatt-hours of wind capacity bought and not used.
+> The forecast was too high in 85% of half-hours — this is not noise, it is a standing offset, and an
+> offset can be corrected."
+> "Move the cutoff to midnight and watch the age jump to 26–47 hours and the error grow — the product
+> tells you how stale the number you are bidding on actually is."
 
 ### 3:15–4:15 — Accuracy view (credibility)
-- Switch tab. Point at the KPIs, then the daily chart.
-  > "Two gigawatts mean absolute error — 17.5% of outturn. But look at the green bars: a third of that
-  > error disappears if you simply subtract the average miss. Best day 552 MW, worst day 4.9 GW."
-- Point at the lead-time chart.
-  > "This is the chart that changes behaviour: the error barely grows between 12 and 48 hours. This is
-  > not a horizon problem, it is a calibration problem in the forecast itself."
+- Switch tab. Three numbers, one chart.
+  > "Average error: two gigawatts, 17.5% of output. Bias: 15.6% high. And what is left after removing
+  > that bias — 1.3 gigawatts. A third of the error is a constant offset, not weather."
+- Point at the daily bars.
+  > "Best day 552 MW, worst day 4.9 GW. You can see which days broke."
 
 ### 4:15–4:45 — Trust
 - Switch to Data & method, scroll the provenance block.

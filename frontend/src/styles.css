@@ -663,9 +663,20 @@ table.data {
   text-align: left;
 }
 
+/* Keep the label columns tight so the numbers stay adjacent, not stranded. */
+.data th:nth-child(1),
+.data td:nth-child(1) {
+  width: 64px;
+}
+
+.data th:nth-child(2),
+.data td:nth-child(2) {
+  width: 110px;
+}
+
 .data tbody td {
   text-align: right;
-  padding: 7px 12px;
+  padding: 5px 12px;
   border-bottom: 1px solid var(--line-soft);
   font-variant-numeric: tabular-nums;
   color: #cfdaea;
