@@ -166,6 +166,10 @@ The delivery grid is the settlement period, because that is the unit the desk bi
 - Energy aggregation stays consistent: `MW × 0.5 h` per period, so a day of flat pairs sums to the same
   MWh as summing the hourly values. Sample sizes are counted in periods (1,488), not hours (744).
 
+Energy totals are summed over the **same set of periods** for forecast and actual. A run that covers
+only 44 of 48 periods must not compare 44 periods of forecast against 48 of outturn, which would
+manufacture a gap out of the missing hours; the app flags partial coverage in the banner instead.
+
 The alternative convention — collapsing outturn to the hourly grid by averaging each pair — gives
 **MAE 2,018 MW vs 2,021 MW (+0.13%)**, RMSE 2,477 vs 2,481, identical bias. The choice changes no
 conclusion; it is documented here so a reviewer can see it was considered rather than stumbled into.

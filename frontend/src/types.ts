@@ -67,6 +67,8 @@ export interface Decision {
   status: 'published' | 'no_forecast'
   dominant_vintage: string | null
   vintages_used: { publish_time: string; half_hours: number }[]
+  coverage: { periods_total: number; with_forecast: number; scored: number; missing_periods: number[] }
+  lead_range_hours: [number, number] | null
   rows: ComparisonRow[]
   summary: Summary
   energy: {
@@ -75,6 +77,7 @@ export interface Decision {
     delta_gwh: number
     buffer_p90_mw: Metric
     recommended_gwh_p90: number
+    periods_used: number
   }
   buffer: Buffer
 }

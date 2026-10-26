@@ -232,8 +232,15 @@ def decision(
         max(vintage_counts.items(), key=lambda kv: kv[1])[0] if vintage_counts else None
     )
     summary = payload["overall"]
-    forecast_gwh = _energy_gwh(comparisons, "forecast_mw")
-    actual_gwh = _energy_gwh(comparisons, "actual_mw")
+
+    # Energy must be summed over ONE set of periods. Summing forecast over the
+    # covered periods and actual over all of them silently compares different
+    # numbers of half-hours and inflates the gap.
+    covered = [c for c in comparisons if c.forecast_mw is not None]
+    scored = [c for c in comparisons if c.forecast_mw is not None and c.actual_mw is not None]
+    forecast_gwh = round(sum(c.forecast_mw for c in scored) * 0.5 / 1000, 2)
+    actual_gwh = round(sum(c.actual_mw for c in scored) * 0.5 / 1000, 2)
+    missing = [c.settlement_period for c in comparisons if c.forecast_mw is None]
 
     return {
         "delivery_date": day.isoformat(),
@@ -246,6 +253,17 @@ def decision(
             for k, v in sorted(vintage_counts.items(), key=lambda kv: kv[1], reverse=True)
         ],
         "rows": rows,
+        "coverage": {
+            "periods_total": len(comparisons),
+            "with_forecast": len(covered),
+            "scored": len(scored),
+            "missing_periods": missing,
+        },
+        "lead_range_hours": (
+            [round(min(c.lead_hours for c in covered), 1), round(max(c.lead_hours for c in covered), 1)]
+            if covered
+            else None
+        ),
         "summary": summary,
         "energy": {
             "forecast_gwh": forecast_gwh,
@@ -253,11 +271,13 @@ def decision(
             "delta_gwh": round(forecast_gwh - actual_gwh, 2),
             "buffer_p90_mw": payload["buffer"]["net_adjustment_mw"],
             # Procurement view: forecast energy plus the calibrated headroom.
+            # The adjustment is a MW figure held for every covered half-hour.
             "recommended_gwh_p90": round(
-                (sum(c.forecast_mw for c in comparisons if c.forecast_mw is not None) * 0.5
-                 + payload["buffer"]["net_adjustment_mw"] * 24) / 1000,
+                (sum(c.forecast_mw for c in covered) * 0.5
+                 + (payload["buffer"]["net_adjustment_mw"] or 0) * len(covered) / 2) / 1000,
                 2,
             ),
+            "periods_used": len(scored),
         },
         "buffer": payload["buffer"],
     }

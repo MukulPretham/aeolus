@@ -5,6 +5,26 @@ import { ErrorState, Kpi, Loading, Panel } from '../components/Panel'
 import { clock, dayShort, fullDay, gwh, mw, pct, signedGwh, signedMw } from '../format'
 import type { Meta } from '../types'
 
+/** Compress a list of settlement periods into a readable range: [3,45,46] -> "3, 45-46". */
+function periodList(periods: number[]): string {
+  if (periods.length === 0) return '—'
+  const sorted = [...periods].sort((a, b) => a - b)
+  const parts: string[] = []
+  let start = sorted[0]
+  let prev = sorted[0]
+  for (const period of sorted.slice(1)) {
+    if (period === prev + 1) {
+      prev = period
+      continue
+    }
+    parts.push(start === prev ? `${start}` : `${start}-${prev}`)
+    start = period
+    prev = period
+  }
+  parts.push(start === prev ? `${start}` : `${start}-${prev}`)
+  return parts.join(', ')
+}
+
 export function DecisionPage({
   meta,
   date,
@@ -41,6 +61,12 @@ export function DecisionPage({
   if (!data) return null
 
   const { summary, energy, buffer } = data
+  const total = data.coverage?.periods_total ?? 48
+  const covered = data.coverage?.with_forecast ?? total
+  const scored = data.coverage?.scored ?? total
+  const partial = covered < total
+  const age = data.lead_range_hours
+  const ageText = age ? `${Math.round(age[0])}-${Math.round(age[1])}h` : null
   const vsForecastPct =
     energy.forecast_gwh > 0 ? ((energy.recommended_gwh_p90 - energy.forecast_gwh) / energy.forecast_gwh) * 100 : 0
 
@@ -82,8 +108,8 @@ export function DecisionPage({
         </div>
       </div>
 
-      <div className={`banner ${data.status === 'published' ? '' : 'warn'}`}>
-        <span className="dot" style={{ background: data.status === 'published' ? 'var(--green)' : 'var(--amber)' }} />
+      <div className={`banner ${data.status === 'published' && !partial ? '' : 'warn'}`}>
+        <span className="dot" style={{ background: partial ? 'var(--amber)' : 'var(--green)' }} />
         <div className="banner-main">
           <span className="banner-title">
             {data.dominant_vintage
@@ -93,10 +119,16 @@ export function DecisionPage({
               : 'No forecast was available before the cutoff'}
           </span>
           <span className="banner-text">
-            {data.vintages_used[0]?.half_hours ?? 0} of 48 settlement periods covered ·{' '}
-            {data.vintages_used.length > 1
-              ? `${data.vintages_used.length} vintages stitched across the day`
-              : 'single vintage, no stitching required'}
+            {partial
+              ? `${covered} of ${total} periods covered — SP ${periodList(
+                  data.coverage?.missing_periods ?? [],
+                )} have no forecast from this run`
+              : `${total} of ${total} periods covered · ${
+                  data.vintages_used.length > 1
+                    ? `${data.vintages_used.length} vintages stitched`
+                    : 'single vintage'
+                }`}
+            {ageText && ` · forecast age ${ageText} at delivery`}
           </span>
         </div>
         <div className="banner-metric">
@@ -111,14 +143,14 @@ export function DecisionPage({
           value={gwh(energy.forecast_gwh)}
           unit="GWh"
           accent={C.forecast}
-          sub={`Mean ${mw(summary.mean_forecast_mw)} MW over the day`}
+          sub={`Mean ${mw(summary.mean_forecast_mw)} MW over ${scored} of ${total} periods`}
         />
         <Kpi
           label="Actual outturn"
           value={gwh(energy.actual_gwh)}
           unit="GWh"
           accent={C.actual}
-          sub={`Mean ${mw(summary.mean_actual_mw)} MW`}
+          sub={`Mean ${mw(summary.mean_actual_mw)} MW over ${scored} of ${total} periods`}
         />
         <Kpi
           label="Forecast error"
@@ -179,6 +211,7 @@ export function DecisionPage({
               The forecast ran {mw(buffer.bias_mw)} MW high on average, so buy less — but hold {mw(buffer.headroom_p90_mw)} MW
               back for the days it runs low. Net {signedMw(buffer.net_adjustment_mw)} MW, calibrated on{' '}
               {buffer.n.toLocaleString('en-GB')} half-hours at {buffer.lead_window} lead (ex-post).
+              {partial && ` This bid covers only the ${covered} periods that have a forecast.`}
             </p>
           </div>
         </Panel>
